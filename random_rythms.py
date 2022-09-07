@@ -1,11 +1,8 @@
 from random import random, seed
-from turtle import pen
-from abjad import Guitar
+#from abjad import Guitar
 from scamp import *
 import random
 import time
-
-from sqlalchemy import false
 
 
 s = Session()
