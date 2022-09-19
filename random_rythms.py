@@ -35,7 +35,6 @@ b_pitch = 26
 tonality = [2, 4, 6]
 
 
-compas_hihat = []
 
 n_compases = input('Ingresar el numero de compases: ')
 
