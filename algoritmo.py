@@ -227,16 +227,17 @@ def Verso(riffs = {}):
     cimbal = []
 
     desicions = Verse_desicion()
+    desicions_copy = desicions.copy()
 
     repetition = random.uniform(0, 1)
     print('rep = ', repetition)
 
     #Repeticion sencilla
     if repetition <= 0.33:
-        for i in desicions:
+        for i in desicions_copy:
             desicions.append(i)
     elif repetition > 0.33 and repetition <= 0.66:
-        for i in reversed(desicions):
+        for i in reversed(desicions_copy):
             desicions.append(i)
 
     for i in desicions:
