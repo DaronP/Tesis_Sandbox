@@ -10,6 +10,7 @@ aeolian = [2, 1, 2, 2, 1, 2, 2]
 mixolydian = [2, 2, 1, 2, 2, 1, 2]
 blues_menor = [3, 2, 1, 1, 3, 2]
 blues_mayor = [2, 1, 1, 3, 2, 3]
+natural_mayor = [2, 2, 1, 2, 2, 2, 1]
 
 chords_form = [2, 4]
 
@@ -201,22 +202,39 @@ def Fundamental():
 
 
 def Verse_desicion():
-    desicions = []
-    for i in range(0,4):
-        n = random.randint(0, 3)
-        if n == 3 and len(desicions) < 1:
-            n = random.randint(0, 2)
+    desicions = set()
+    presets_len = len(verse_presets)
+    for i in range(0, 3):
+        n = random.randint(0, presets_len)
+        if n == 4 and len(desicions) < 1:
+            n = random.randint(0, (presets_len) - 1)
 
-        desicions.append(n)
+        desicions.add(n)
 
         if n == 2 and len(desicions) > 2:
-            desicions.append(n)
+            desicions.add(n)
             i += 1
         
-        if desicions[0] != n and 0 not in desicions:
-            desicions.append(0)
+        
+    
+    verse = []
+    for _ in range(4):
+        d = bool(random.getrandbits(1))
+        if d:
+            n = random.choice(list(desicions))
 
-    return desicions
+            verse.append(n)
+
+            if verse[0] != n and 0 not in verse:
+                verse.append(0)
+        else:
+            verse.append(0)
+        
+    if 0 not in verse:
+        verse.insert(2, 0)
+        verse.append(0)
+
+    return verse
 
 
 def Verso(riffs = {}):
@@ -321,12 +339,12 @@ rola = Rola()
 rolon = dict()
 verso1 = dict()
 print(Rola())
-#for i in rola:
+
 rolon = Fundamental()
 verso1 = Verso(rolon['perc'])
 
-'''for i in rolon['fundamental']:
-    print(i)'''
+for i in rolon['fundamental']:
+    print(i)
 print(len(rolon['fundamental']))
 print(len(verso1['kick']))
 
