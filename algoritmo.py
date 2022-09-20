@@ -203,7 +203,7 @@ def Fundamental():
 
 def Verse_desicion():
     desicions = set()
-    presets_len = len(verse_presets)
+    presets_len = len(rythm_presets)
     for i in range(0, 3):
         n = random.randint(0, presets_len)
         if n == 4 and len(desicions) < 1:
@@ -271,7 +271,7 @@ def Verso(riffs = {}):
                     elif r == 'cimbal':
                         cimbal.append(m)
         else:
-            for tech_num, (tech, perc) in enumerate(verse_presets.items()):
+            for tech_num, (tech, perc) in enumerate(rythm_presets.items()):
                 if i == tech_num + 1:                    
                     for instrument in perc:
                         for c in perc[instrument]:
