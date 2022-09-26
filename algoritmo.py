@@ -1,7 +1,6 @@
-from random import random, seed
+from random import random, seed, choice
 from scamp import *
 import random
-from random import choice
 import time
 from instruments import *
 from presets import *
@@ -81,13 +80,21 @@ for i in scale_blues_m:
 
 
 #----------------------------------------------------------------------------------------------------------------
+fund = list()
 
-def Fundamental():
+def Fundamental(mood='', part=''):
 
     kick_penta = []
     snare_penta = []
     hh_penta = []
     cimbal_penta = []
+
+    figure = 5
+
+    if part == 'chorus':
+        figure -= 1
+    if mood == 'melancholic':
+        figure -= 2
 
     for i in range(1):
         for i in range(4):
@@ -112,7 +119,7 @@ def Fundamental():
                 for j in range(4):
                     
                     sum_compas = sum(compas)
-                    nota = 1/pow(2, random.randrange(2, 5))
+                    nota = 1/pow(2, random.randrange(2, figure))
                     nota = nota/0.25
 
                     if nota == 1.0:
@@ -150,15 +157,6 @@ def Fundamental():
                 kick_penta.append(p)
 
 
-        '''print('-----------------------------------------------------------------------------------------------------')
-    for i in penta:
-        print(i)
-        su = 0.0
-        for r in i:
-            su += r
-        print(su)
-    print(len(penta))'''
-
     fundamental = kick_penta.copy()
 
     snare_beats = bool(random.getrandbits(1))
@@ -192,19 +190,81 @@ def Fundamental():
         snare_penta.append(snare_compas)
         cimbal_penta.append(cimbal_compas)
 
-    fundamental = {'fundamental': fundamental, 
+    fundamental_rythm = {'fundamental': fundamental, 
                    'perc': {'kick': kick_penta, 
                             'hhat': hh_penta,
                             'snare': snare_penta,
                             'cimbal': cimbal_penta}}
-    return fundamental
+    return fundamental_rythm
+
+def Intro(fundamental):
+    intro = {'guitar': [], 'kick': [], 'hhat': [], 'snare': [], 'cimbal': []}
+    kick_penta = []
+    snare_penta = []
+    hh_penta = []
+    cimbal_penta = []
+    
+    intro_desicion = random.choice(['Fundamental', 'Bridges'])
+
+    kick = fundamental['kick'].copy()
+    intro_kick=list()
+
+    for compas in kick:
+        pila = []
+        pila_check = compas.copy()
+        for note in range(len(compas)):
+            try:
+                if compas[note] == 1.0:
+                    pila.append(compas[note])
+                    pila_check[note] = 'done'
+                else:
+                    if pila_check[note] == 'done':
+                        pass
+                    elif compas[note] == compas[note + 1]:                            
+                        pila.append(compas[note] * 2)
+                        pila_check[note] = 'done'
+                        pila_check[note + 1] = 'done'
+                    elif (compas[note] * -1) == compas[note + 1]:
+                        pila.append(compas[note] * (-2))
+                        pila_check[note] = 'done'
+                        pila_check[note + 1] = 'done'
+                    else:
+                        pila.append(compas[note])
+                        pila_check[note] = 'done'
+            except:
+                pass
+    
+        intro_kick.append(pila)
+
+    
+    if intro_desicion == 'Fundamental':
+        kick_penta = intro_kick
+        hh_penta = fundamental['hhat'].copy()
+        cimbal_penta = fundamental['cimbal'].copy()
+
+        for i in range(len(kick_penta)):
+            pila_snare = []
+            for j in range(len(kick_penta[i])):
+                pila_snare.append(kick_penta[i][j] * -1)
+            snare_penta.append(pila_snare)
+        
+        intro['kick'] = kick_penta
+        intro['snare'] = snare_penta
+        intro['hhat'] = hh_penta
+        intro['cimbal'] = cimbal_penta
+        intro['guitar'] = kick_penta
+        
+        return intro
+
+    elif intro_desicion == 'Bridges': #/*/*/*/*/*/*/*/*/*/*/*/*/*/**/
+        intro['guitar'] = intro_kick
 
 
 
 def Verse_desicion():
     desicions = set()
     presets_len = len(rythm_presets)
-    for i in range(0, 3):
+    for i in range(0, 4):
         n = random.randint(0, presets_len)
         if n == 4 and len(desicions) < 1:
             n = random.randint(0, (presets_len) - 1)
@@ -218,7 +278,7 @@ def Verse_desicion():
         
     
     verse = []
-    for _ in range(4):
+    for _ in range(8):
         d = bool(random.getrandbits(1))
         if d:
             n = random.choice(list(desicions))
@@ -236,13 +296,13 @@ def Verse_desicion():
 
     return verse
 
-
 def Verso(riffs = {}):
-    verso = {'kick': [], 'hhat': [], 'snare': [], 'cimbal': []}
+    verso = {'guitar': [], 'kick': [], 'hhat': [], 'snare': [], 'cimbal': []}
     kick = []
     snare = []
     hhat = []
     cimbal = []
+    guitar = []
 
     desicions = Verse_desicion()
     desicions_copy = desicions.copy()
@@ -264,6 +324,7 @@ def Verso(riffs = {}):
                 for m in riffs[r]:
                     if r == 'kick':
                         kick.append(m)
+                        guitar.append(m)
                     elif r == 'hhat':
                         hhat.append(m)
                     elif r == 'snare':
@@ -277,6 +338,7 @@ def Verso(riffs = {}):
                         for c in perc[instrument]:
                             if instrument == 'kick':
                                 kick.append(c)
+                                guitar.append(c)
                             elif instrument == 'snare':
                                 snare.append(c)
                             elif instrument == 'hhat':
@@ -289,13 +351,135 @@ def Verso(riffs = {}):
     verso['hhat'] = hhat
     verso['snare'] = snare
     verso['cimbal'] = cimbal
+    verso['guitar'] = guitar
 
     print(desicions)
 
     return verso
 
-def Coro():
-    pass
+
+
+def Coro(fundamental):
+    coro = {'guitar': [], 'kick': [], 'hhat': [], 'snare': [], 'cimbal': []}
+    kick_penta = []
+    snare_penta = []
+    hh_penta = []
+    cimbal_penta = []
+
+    chorus_choise = random.choice(['New', 'Fundamental', 'Melodic'])
+    print(chorus_choise, ' chorus')
+    chorus_choise = 'New'
+    
+    if chorus_choise == 'New':
+        chorus_rythm = Fundamental(part='chorus')['perc']
+        coro['guitar'] = chorus_rythm['kick']
+        coro['kick'] = chorus_rythm['kick']
+        coro['snare'] = chorus_rythm['snare']
+        coro['hhat'] = chorus_rythm['hhat']
+        coro['cimbal'] = chorus_rythm['cimbal']
+
+        return coro
+    
+    elif chorus_choise == 'Melodic':
+        kick = fundamental['kick'].copy()
+        chorus_guitar=list()
+
+        for compas in kick:
+            pila = []
+            pila_check = compas.copy()
+            for note in range(len(compas)):
+                try:
+                    if compas[note] == 1.0:
+                        pila.append(compas[note])
+                        pila_check[note] = 'done'
+                    else:
+                        if pila_check[note] == 'done':
+                            pass
+                        elif compas[note] == compas[note + 1]:                            
+                            pila.append(compas[note] * 2)
+                            pila_check[note] = 'done'
+                            pila_check[note + 1] = 'done'
+                        elif (compas[note] * -1) == compas[note + 1]:
+                            pila.append(compas[note] * (-2))
+                            pila_check[note] = 'done'
+                            pila_check[note + 1] = 'done'
+                        else:
+                            pila.append(compas[note])
+                            pila_check[note] = 'done'
+                except:
+                    pass
+        
+            chorus_guitar.append(pila)
+
+        
+
+        kick_penta = chorus_guitar
+        hh_penta = fundamental['hhat'].copy()
+        cimbal_penta = fundamental['cimbal'].copy()
+
+
+        for i in range(len(kick_penta)):
+            pila_snare = []
+            for j in range(len(kick_penta[i])):
+                pila_snare.append(kick_penta[i][j] * -1)
+            snare_penta.append(pila_snare)
+        
+        coro['kick'] = kick_penta
+        coro['snare'] = snare_penta
+        coro['hhat'] = hh_penta
+        coro['cimbal'] = cimbal_penta
+        coro['guitar'] = kick_penta
+        
+        return coro
+
+    elif chorus_choise == 'Fundamental':
+        kick = fundamental['kick'].copy()
+        chorus_guitar=list()
+
+        for compas in kick:
+            pila = []
+            pila_check = compas.copy()
+            for note in range(len(compas)):
+                try:
+                    if compas[note] == 1.0:
+                        pila.append(compas[note])
+                        pila_check[note] = 'done'
+                    else:
+                        if pila_check[note] == 'done':
+                            pass
+                        elif compas[note] == compas[note + 1]:                            
+                            pila.append(compas[note] * 2)
+                            pila_check[note] = 'done'
+                            pila_check[note + 1] = 'done'
+                        elif (compas[note] * -1) == compas[note + 1]:
+                            pila.append(compas[note] * (-2))
+                            pila_check[note] = 'done'
+                            pila_check[note + 1] = 'done'
+                        else:
+                            pila.append(compas[note])
+                            pila_check[note] = 'done'
+                except:
+                    pass
+        
+            chorus_guitar.append(pila)
+
+        
+
+        kick_penta = fundamental['kick'].copy()
+        hh_penta = fundamental['hhat'].copy()
+        cimbal_penta = fundamental['cimbal'].copy()
+        snare_penta = fundamental['snare'].copy()
+        
+        coro['kick'] = kick_penta
+        coro['snare'] = snare_penta
+        coro['hhat'] = hh_penta
+        coro['cimbal'] = cimbal_penta
+        coro['guitar'] = chorus_guitar
+        
+        return coro
+
+
+
 
 def Outtro():
     pass
@@ -310,11 +494,13 @@ def Rola():
     if have_intro == 1:
         song_structure.append('Intro')
     
-    #Generical song structure
+    #Generic song structure
     #Verse
     song_structure.append('Verse')
+
     #Chorus
     song_structure.append('Chorus')
+
     #Will second verse will be different?
     different_verse = random.getrandbits(1)
     if different_verse:
@@ -322,7 +508,9 @@ def Rola():
     else:
         #Same verse
         song_structure.append('Verse')
+
     song_structure.append('Chorus')
+    
     song_structure.append('Bridge')
 
     #Will it have outtro?
@@ -342,12 +530,13 @@ print(Rola())
 
 rolon = Fundamental()
 verso1 = Verso(rolon['perc'])
+coro = Coro(rolon['perc'])
 
 for i in rolon['fundamental']:
     print(i)
 print(len(rolon['fundamental']))
 print(len(verso1['kick']))
-
+print(len(coro['kick']))
 print('holi')
 
 
