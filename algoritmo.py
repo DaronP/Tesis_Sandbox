@@ -12,6 +12,7 @@ blues_mayor = [2, 1, 1, 3, 2, 3]
 natural_mayor = [2, 2, 1, 2, 2, 2, 1]
 
 chords_form = [2, 4]
+mood = 'aggressive'
 
 d_file = open('Drum Map.txt', 'r')
 drum_kit = d_file.readlines()
@@ -82,7 +83,7 @@ for i in scale_blues_m:
 #----------------------------------------------------------------------------------------------------------------
 fund = list()
 
-def Fundamental(mood='', part=''):
+def Fundamental(part=''):
 
     kick_penta = []
     snare_penta = []
@@ -240,13 +241,14 @@ def Intro(fundamental):
     if intro_desicion == 'Fundamental':
         kick_penta = intro_kick
         hh_penta = fundamental['hhat'].copy()
+        snare_penta = fundamental['snare'].copy()
         cimbal_penta = fundamental['cimbal'].copy()
 
-        for i in range(len(kick_penta)):
+        '''for i in range(len(kick_penta)):
             pila_snare = []
             for j in range(len(kick_penta[i])):
                 pila_snare.append(kick_penta[i][j] * -1)
-            snare_penta.append(pila_snare)
+            snare_penta.append(pila_snare)'''
         
         intro['kick'] = kick_penta
         intro['snare'] = snare_penta
@@ -263,7 +265,7 @@ def Intro(fundamental):
 
 def Verse_desicion():
     desicions = set()
-    presets_len = len(rythm_presets)
+    presets_len = len(rythm_presets) - 1
     for i in range(0, 4):
         n = random.randint(0, presets_len)
         if n == 4 and len(desicions) < 1:
@@ -273,12 +275,13 @@ def Verse_desicion():
 
         if n == 2 and len(desicions) > 2:
             desicions.add(n)
-            i += 1
-        
-        
+            i += 1        
     
     verse = []
-    for _ in range(8):
+
+    verse_limit = random.randint(4, 8)
+    
+    while len(verse) < verse_limit:
         d = bool(random.getrandbits(1))
         if d:
             n = random.choice(list(desicions))
@@ -294,29 +297,48 @@ def Verse_desicion():
         verse.insert(2, 0)
         verse.append(0)
 
-    return verse
+    leads = bool(random.getrandbits(1))
+
+    return [verse, leads]
 
 def Verso(riffs = {}):
-    verso = {'guitar': [], 'kick': [], 'hhat': [], 'snare': [], 'cimbal': []}
+    verso = {'guitar': [], 'kick': [], 'hhat': [], 'snare': [], 'cimbal': [], 'leads': []}
     kick = []
     snare = []
     hhat = []
     cimbal = []
     guitar = []
+    leads = []
 
-    desicions = Verse_desicion()
+    desicions, leads_bool = Verse_desicion()
     desicions_copy = desicions.copy()
 
-    repetition = random.uniform(0, 1)
-    print('rep = ', repetition)
+    repetition = 1
 
-    #Repeticion sencilla
-    if repetition <= 0.33:
-        for i in desicions_copy:
-            desicions.append(i)
-    elif repetition > 0.33 and repetition <= 0.66:
-        for i in reversed(desicions_copy):
-            desicions.append(i)
+    #Sin repeticion
+    if mood != 'aggressive':
+        pass
+    elif len(desicions) > 4:
+        pass
+    else:
+        repetition = random.uniform(0, 1)
+        print('rep = ', repetition)
+        #Repeticion sencilla
+        if repetition <= 0.33:
+            for i in desicions_copy:
+                desicions.append(i)
+        #Repeticion en reversa
+        elif repetition > 0.33 and repetition <= 0.66:
+            for i in reversed(desicions_copy):
+                desicions.append(i)
+        #repeticion > 0.66 no hay repeticion
+    
+    for d in range(len(desicions)):
+        try:
+            if desicions[d] == 0 and desicions[d] == desicions[d + 1] and desicions[d + 1] == desicions[d + 2] and desicions[d + 2] == desicions[d + 3]:
+                leads_bool = True
+        except:
+            pass
 
     for i in desicions:
         if i == 0:
@@ -345,6 +367,13 @@ def Verso(riffs = {}):
                                 hhat.append(c)
                             elif instrument == 'cimbal':
                                 cimbal.append(c)
+
+    if leads_bool:
+        for k in kick:
+            leads_pila = []
+            for _ in range(16):
+                leads_pila.append(0.25)
+            leads.append(leads_pila)
     
     
     verso['kick'] = kick
@@ -352,6 +381,7 @@ def Verso(riffs = {}):
     verso['snare'] = snare
     verso['cimbal'] = cimbal
     verso['guitar'] = guitar
+    verso['leads'] = leads
 
     print(desicions)
 
@@ -369,14 +399,18 @@ def Coro(fundamental):
     chorus_choise = random.choice(['New', 'Fundamental', 'Melodic'])
     print(chorus_choise, ' chorus')
     chorus_choise = 'New'
+
+    repetition = random.randint(4, 8)
     
     if chorus_choise == 'New':
         chorus_rythm = Fundamental(part='chorus')['perc']
-        coro['guitar'] = chorus_rythm['kick']
-        coro['kick'] = chorus_rythm['kick']
-        coro['snare'] = chorus_rythm['snare']
-        coro['hhat'] = chorus_rythm['hhat']
-        coro['cimbal'] = chorus_rythm['cimbal']
+
+        for i in range(repetition):
+            coro['guitar'].append(chorus_rythm['kick'])
+            coro['kick'].append(chorus_rythm['kick'])
+            coro['snare'].append(chorus_rythm['snare'])
+            coro['hhat'].append(chorus_rythm['hhat'])
+            coro['cimbal'].append(chorus_rythm['cimbal'])
 
         return coro
     
@@ -415,20 +449,22 @@ def Coro(fundamental):
 
         kick_penta = chorus_guitar
         hh_penta = fundamental['hhat'].copy()
+        snare_penta = fundamental['snare'].copy()
         cimbal_penta = fundamental['cimbal'].copy()
 
 
-        for i in range(len(kick_penta)):
+        '''for i in range(len(kick_penta)):
             pila_snare = []
             for j in range(len(kick_penta[i])):
                 pila_snare.append(kick_penta[i][j] * -1)
-            snare_penta.append(pila_snare)
+            snare_penta.append(pila_snare)'''
         
-        coro['kick'] = kick_penta
-        coro['snare'] = snare_penta
-        coro['hhat'] = hh_penta
-        coro['cimbal'] = cimbal_penta
-        coro['guitar'] = kick_penta
+        for i in repetition:
+            coro['kick'].append(kick_penta)
+            coro['snare'].append(snare_penta)
+            coro['hhat'].append(hh_penta)
+            coro['cimbal'].append(cimbal_penta)
+            coro['guitar'].append(kick_penta)
         
         return coro
 
@@ -470,11 +506,12 @@ def Coro(fundamental):
         cimbal_penta = fundamental['cimbal'].copy()
         snare_penta = fundamental['snare'].copy()
         
-        coro['kick'] = kick_penta
-        coro['snare'] = snare_penta
-        coro['hhat'] = hh_penta
-        coro['cimbal'] = cimbal_penta
-        coro['guitar'] = chorus_guitar
+        for _ in repetition:
+            coro['kick'].append(kick_penta)
+            coro['snare'].append(snare_penta)
+            coro['hhat'].append(hh_penta)
+            coro['cimbal'].append(cimbal_penta)
+            coro['guitar'].append(chorus_guitar)
         
         return coro
 
@@ -535,15 +572,20 @@ coro = Coro(rolon['perc'])
 for i in rolon['fundamental']:
     print(i)
 print(len(rolon['fundamental']))
-print(len(verso1['kick']))
-print(len(coro['kick']))
+print('length of verse: ', (len(verso1['kick'])*4)/(s.tempo/60))
+print('length of chorus: ', (len(coro['kick'])*4)/(s.tempo/60))
 print('holi')
 
 
-s.fork(play_kick_drum, args=[verso1['kick']])
+'''s.fork(play_kick_drum, args=[verso1['kick']])
 s.fork(play_hhat, args=[verso1['hhat']]) 
 s.fork(play_snare, args=[verso1['snare']])
-s.fork(play_cimbal, args=[verso1['cimbal']])
+s.fork(play_cimbal, args=[verso1['cimbal']])'''
+
+s.fork(play_kick_drum, args=[coro['kick']])
+s.fork(play_hhat, args=[coro['hhat']]) 
+s.fork(play_snare, args=[coro['snare']])
+s.fork(play_cimbal, args=[coro['cimbal']])
 
 
 s.wait_for_children_to_finish()
