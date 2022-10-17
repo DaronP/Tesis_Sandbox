@@ -1,9 +1,15 @@
-from random import random, seed, choice
+from random import random
 from scamp import *
 import random
 import time
 from instruments import *
 from presets import *
+import json
+import sys
+
+seed = random.randrange(sys.maxsize)
+rng = random.Random(seed)
+
 
 scales = {'minor scales':{'aeolian': [2, 1, 2, 2, 1, 2, 2],      
                         'blues_minor': [3, 2, 1, 1, 3, 2],
@@ -35,14 +41,6 @@ drum_kit = d_file.readlines()
 
 
 ######################################-----------------------------------############################################
-
-'''for i in range(len(drum_kit)):
-    percussion = drum_kit[i]
-    percussion = percussion.replace('\n', '')
-    percussion = percussion.split(' - ')
-    percussion[0] = int(percussion[0])
-    drum_kit[i] = percussion
-    #print(drum_kit[i])'''
 
 
 def make_chords(scale=[], scale_form = 0):
@@ -80,7 +78,7 @@ def string_notes(pitch = 4, scale_name=''):
         scale_name = random.choice(list(scales['minor scales'].keys()))
         scale = scales['minor scales'][scale_name]
     elif mood == 'epic' and scale_name == '':
-        scale_name = random.choice(list(scales['minor scales'].keys()))
+        scale_name = random.choice(list(scales['major scales'].keys()))
         scale = scales['major scales'][scale_name]
     elif scale_name != '':
         try:
@@ -164,6 +162,8 @@ def make_bass(rythm):
                 fifth = bool(random.getrandbits(1))
                 if fifth:
                     compas.append(scale_chords[2][progression[p_count]][-1])
+                else:
+                    compas.append(scale_chords[2][progression[p_count]][0])
             elif p_count == 2 or p_count == 6:
                 compas.append(scale_chords[2][progression[p_count]][1])
             else:
@@ -173,6 +173,19 @@ def make_bass(rythm):
 
 
     return bass_compas
+
+def allEqual(iterable):
+    iterator = iter(iterable)
+    
+    try:
+        firstItem = next(iterator)
+    except StopIteration:
+        return True
+        
+    for x in iterator:
+        if x!=firstItem:
+            return False
+    return True
 
 def make_guitar(rythm, isLeads=False, isChorus=False):
     guitar_notes = []
@@ -188,8 +201,8 @@ def make_guitar(rythm, isLeads=False, isChorus=False):
                 prog_count = 0
             compas = []
             for i in range(len(r)):
-                if (r[i] == 0.25 or r[i] == 0.125) and isLeads == False:
-                    compas.append(scale_chords[2][0][0])
+                if ((r[i] == 0.25 or r[i] == 0.125) and isLeads == False) or (allEqual(r) and r[i] == 0.5):
+                    compas.append([scale_chords[2][0][0], scale_chords[2][0][-1]])
                 else:
                     if i == 0:
                         compas.append(scale_chords[2][progression[prog_count]][0])
@@ -453,7 +466,7 @@ def Intro(strings, fundamental):
         intro['hhat'] = hh_penta
         intro['cimbal'] = cimbal_penta
         intro['guitar'] = guitar_penta
-        intro['bass_rythm'] = intro['guitar']
+        intro['bass_rythm'] = intro['guitar'].copy()
 
         guitar_notes = make_guitar(rythm=intro['guitar'])
         bass_notes = make_bass(intro['guitar'])
@@ -584,13 +597,25 @@ def Verso(string, rythm):
             string[1] = [0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25]
             string[4] = [0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25]
             string[5] = [0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25]
+
+            rythm['kick'][0] = [0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25]
+            rythm['kick'][1] = [0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25]
+            rythm['kick'][4] = [0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25]
+            rythm['kick'][5] = [0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25, 0.25, 0.25, 0.25, -0.25]
         else:
-            string[0] = [0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25]
-            string[1] = [0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25]
-            string[2] = [0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25]
-            string[4] = [0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25]
-            string[5] = [0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25]
-            string[6] = [0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25]
+            string[0] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+            string[1] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+            string[2] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+            string[4] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+            string[5] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+            string[6] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+
+            rythm['kick'][0] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+            rythm['kick'][1] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+            rythm['kick'][2] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+            rythm['kick'][4] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+            rythm['kick'][5] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+            rythm['kick'][6] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
     
     #Checking for leads
     for d in range(len(desicions)):
@@ -709,7 +734,7 @@ def Verso(string, rythm):
     verso['leads'] = leads
     verso['bass'] = bass
     verso['guitar_notes'] = guitar_notes
-    verso['bass_rythm'] = guitar
+    verso['bass_rythm'] = guitar.copy()
 
     print(desicions)
 
@@ -727,12 +752,20 @@ def Coro(fundamental):
     chorus_choise = random.choice(['New', 'Fundamental', 'Melodic'])
     print(chorus_choise, ' chorus')
 
-    repetition = random.randint(3,5)
+    if mood == 'aggressive':
+        repetition = random.randint(3,5)
+    elif mood == 'epic':
+        repetition = random.randint(2,3)
+    elif mood == 'melancholic':
+        repetition = random.randint(1,3)
     
     if chorus_choise == 'New':
         new_fundamental = Fundamental(part='chorus')
         chorus_rythm = new_fundamental['perc']
-        chorus_string = new_fundamental['string']['guitar']
+        chorus_string = []
+        
+        for _ in range(len(chorus_rythm['kick'])):
+            chorus_string.append([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
 
         for _ in range(repetition):
             for i in range(len(chorus_rythm['kick'])):
@@ -744,11 +777,11 @@ def Coro(fundamental):
                 coro['cimbal'].append(chorus_rythm['cimbal'][i])
         
         guitar_chords = make_guitar(coro['guitar'], isChorus=True)
-        bass_notes = make_bass(coro['kick'])
+        bass_notes = make_bass(coro['guitar'])
 
         coro['guitar_notes'] = guitar_chords
         coro['bass'] = bass_notes
-        coro['bass_rythm'] = coro['kick']
+        coro['bass_rythm'] = coro['guitar'].copy()
 
         
         return coro
@@ -756,7 +789,10 @@ def Coro(fundamental):
     elif chorus_choise == 'Melodic':
         kick = fundamental['kick'].copy()
 
-        chorus_guitar = reduce_notes(kick)
+        chorus_guitar = []
+
+        for _ in range(len(kick)):
+            chorus_guitar.append([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
 
         kick_penta = chorus_guitar
         hh_penta = fundamental['hhat'].copy()
@@ -783,14 +819,17 @@ def Coro(fundamental):
 
         coro['guitar_notes'] = guitar_chords
         coro['bass'] = bass_notes
-        coro['bass_rythm'] = coro['kick']
+        coro['bass_rythm'] = coro['kick'].copy()
         
         return coro
 
     elif chorus_choise == 'Fundamental':
         kick = fundamental['kick'].copy()
 
-        chorus_guitar = reduce_notes(kick)        
+        chorus_guitar = []
+
+        for _ in range(len(kick)):
+            chorus_guitar.append([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])      
 
         kick_penta = fundamental['kick'].copy()
         hh_penta = fundamental['hhat'].copy()
@@ -806,19 +845,46 @@ def Coro(fundamental):
                 coro['guitar'].append(chorus_guitar[k])
 
         guitar_chords = make_guitar(coro['guitar'], isChorus=True)
-        bass_notes = make_bass(coro['kick'])
+        bass_notes = make_bass(coro['guitar'])
 
         coro['guitar_notes'] = guitar_chords
         coro['bass'] = bass_notes
-        coro['bass_rythm'] = coro['kick']
+        coro['bass_rythm'] = coro['guitar'].copy()
         
         return coro
 
 
 
 
-def Outtro():
-    pass
+def Outro(verse, last_chord):
+    outro = verse.copy()
+    
+    outro['guitar'][0] = [4.0]
+    outro['guitar_notes'][0] = [last_chord]
+    outro['guitar'][1] = [4.0]
+    outro['guitar_notes'][1] = [last_chord]
+
+    outro['bass_rythm'][0] = [-4.0]
+    outro['bass'][0] = [last_chord[0]]
+    outro['bass_rythm'][1] = [-4.0]
+    outro['bass'][1] = [last_chord[0]]
+
+    outro['kick'][0] = [-1.0, -1.0, -1.0, -1.0]
+    outro['snare'][0] = [-1.0, -1.0, -1.0, -1.0]
+    outro['hhat'][0] = [-1.0, -1.0, -1.0, -1.0]
+    outro['cimbal'][0] = [-1.0, -1.0, -1.0, -1.0]
+    outro['kick'][1] = [-1.0, -1.0, -1.0, -1.0]
+    outro['snare'][1] = [-1.0, -1.0, -1.0, -1.0]
+    outro['hhat'][1] = [-1.0, -1.0, -1.0, -1.0]
+    outro['cimbal'][1] = [-1.0, -1.0, -1.0, -1.0]
+    
+    try:
+        del outro['leads']
+    except:
+        pass
+
+    return(outro)
+
 
 
 def Composer():
@@ -862,8 +928,7 @@ def Composer():
     #Will it have outtro?
     if have_outtro:
         #It has an outtro
-        #What outtro? Beat drop or guitar solo?
-        song_structure.append('Outtro')
+        song_structure.append('Outro')
     
     composition = dict()
     verso1 = dict()
@@ -934,6 +999,20 @@ def Composer():
                 song_rythm_composed['hhat'].append(coro['hhat'][c])
                 song_rythm_composed['cimbal'].append(coro['cimbal'][c])
 
+        if song_structure[i] == 'Outro':
+            print(song_string_composed['guitar_notes'][-1][-1])
+            outro = Outro(verso1, song_string_composed['guitar_notes'][-1][-1])
+
+            for c in range(len(outro['kick']) - 1):
+                song_string_composed['guitar_notes'].append(outro['guitar_notes'][c])
+                song_string_composed['bass'].append(outro['bass'][c])
+                song_string_composed['g_rythm'].append(outro['guitar'][c])
+                song_string_composed['b_rythm'].append(outro['bass_rythm'][c])
+
+                song_rythm_composed['kick'].append(outro['kick'][c])
+                song_rythm_composed['snare'].append(outro['snare'][c])
+                song_rythm_composed['hhat'].append(outro['hhat'][c])
+                song_rythm_composed['cimbal'].append(outro['cimbal'][c])
     
     return [song_string_composed, song_rythm_composed]
     
@@ -960,8 +1039,15 @@ print('length of chorus: ', (len(coro['kick'])*4)/(s.tempo/60))'''
 print('holi')
 
 
+with open("string.json", "w") as write_file:
+    json.dump(composed_string, write_file, indent=4)
 
-s.fork(play_guitar, args=[composed_string['guitar_notes'][0], composed_string['g_rythm'][0]])
+with open("percussion.json", "w") as write_file:
+    json.dump(composed_rythm, write_file, indent=4)
+
+print("Seed was:", seed)
+
+'''s.fork(play_guitar, args=[composed_string['guitar_notes'][0], composed_string['g_rythm'][0]])
 #s.fork(play_bass, args=[composed_string['bass_notes'][0], composed_string['b_rythm'][0]])
 s.fork(play_kick_drum, args=[composed_rythm['kick'][0]])
 s.fork(play_hhat, args=[composed_rythm['hhat'][0]]) 
@@ -969,4 +1055,4 @@ s.fork(play_snare, args=[composed_rythm['snare'][0]])
 s.fork(play_cimbal, args=[composed_rythm['cimbal'][0]])
 
 
-s.wait_for_children_to_finish()
+s.wait_for_children_to_finish()'''
