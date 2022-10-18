@@ -2,13 +2,12 @@ from random import random
 from scamp import *
 import random
 import time
-from instruments import *
 from presets import *
 import json
 import sys
 
-'''seed = random.randrange(sys.maxsize)
-rng = random.Random(4875434493137809954)'''
+seed = random.randrange(sys.maxsize/2)
+rng = random.Random(4875434493137809954)
 
 
 scales = {'minor scales':{'aeolian': [2, 1, 2, 2, 1, 2, 2],      
@@ -198,7 +197,7 @@ def make_guitar(rythm, isLeads=False, isChorus=False):
     
     if not isChorus:
         for r in rythm:
-            if prog_count >= 7:
+            if prog_count >= 8:
                 prog_count = 0
             compas = []
             for i in range(len(r)):
@@ -218,14 +217,11 @@ def make_guitar(rythm, isLeads=False, isChorus=False):
 
     else:
         for r in rythm:
-            if prog_count >= 7:
+            if prog_count >= 8:
                 prog_count = 0
             compas = []
             for i in range(len(r)):
-                if i == 0:
-                    compas.append(scale_chords[4][progression[prog_count]])
-                else:
-                    compas.append(scale_chords[4][progression[prog_count]])
+                compas.append(scale_chords[4][progression[prog_count]])
             guitar_notes.append(compas)
             prog_count += 1
 
@@ -868,6 +864,22 @@ def Coro(fundamental):
 
 def Outro(verse, last_chord):
     outro = verse.copy()
+
+    l = len(outro['kick'])
+
+    new_l = int(l/2)
+
+    for _ in range(new_l):
+        del outro['guitar'][-1]
+        del outro['guitar_notes'][-1]
+
+        del outro['bass_rythm'][-1]
+        del outro['bass'][-1]
+
+        del outro['kick'][-1]
+        del outro['snare'][-1]
+        del outro['hhat'][-1]
+        del outro['cimbal'][-1]
     
     outro['guitar'][0] = [4.0]
     outro['guitar_notes'][0] = [last_chord]
@@ -1023,8 +1035,10 @@ def Composer():
                 song_rythm_composed['snare'].append(outro['snare'][c])
                 song_rythm_composed['hhat'].append(outro['hhat'][c])
                 song_rythm_composed['cimbal'].append(outro['cimbal'][c])
+
+    song = {'string': song_string_composed, 'percussion': song_rythm_composed}
     
-    return [song_string_composed, song_rythm_composed]
+    return song
     
 #///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1036,7 +1050,7 @@ progression = make_progression(scale_name)
 
 
 
-composed_string, composed_rythm = Composer()
+composed = Composer()
 
 
 #---------------------MUSIKONG-----------------------
@@ -1049,13 +1063,10 @@ print('length of chorus: ', (len(coro['kick'])*4)/(s.tempo/60))'''
 print('holi')
 
 
-with open("string.json", "w") as write_file:
-    json.dump(composed_string, write_file, indent=4)
+with open("song.json", "w") as write_file:
+    json.dump(composed, write_file, indent=4)
 
-with open("percussion.json", "w") as write_file:
-    json.dump(composed_rythm, write_file, indent=4)
-
-#print("Seed was:", seed)
+print("Seed was:", seed)
 
 '''s.fork(play_guitar, args=[composed_string['guitar_notes'][0], composed_string['g_rythm'][0]])
 #s.fork(play_bass, args=[composed_string['bass_notes'][0], composed_string['b_rythm'][0]])
