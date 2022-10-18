@@ -7,8 +7,8 @@ from presets import *
 import json
 import sys
 
-seed = random.randrange(sys.maxsize)
-rng = random.Random(seed)
+'''seed = random.randrange(sys.maxsize)
+rng = random.Random(4875434493137809954)'''
 
 
 scales = {'minor scales':{'aeolian': [2, 1, 2, 2, 1, 2, 2],      
@@ -764,8 +764,11 @@ def Coro(fundamental):
         chorus_rythm = new_fundamental['perc']
         chorus_string = []
         
-        for _ in range(len(chorus_rythm['kick'])):
-            chorus_string.append([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+        if mood == 'melancholic' or mood == 'epic':
+            for _ in range(len(chorus_rythm['kick'])):
+                chorus_string.append([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+        else:
+            chorus_string = new_fundamental['string']['guitar']
 
         for _ in range(repetition):
             for i in range(len(chorus_rythm['kick'])):
@@ -791,8 +794,11 @@ def Coro(fundamental):
 
         chorus_guitar = []
 
-        for _ in range(len(kick)):
-            chorus_guitar.append([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+        if mood == 'melancholic' or mood == 'epic':
+            for _ in range(len(kick)):
+                chorus_guitar.append([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+        else:
+            chorus_guitar = reduce_notes(fundamental['kick'])
 
         kick_penta = chorus_guitar
         hh_penta = fundamental['hhat'].copy()
@@ -828,8 +834,11 @@ def Coro(fundamental):
 
         chorus_guitar = []
 
-        for _ in range(len(kick)):
-            chorus_guitar.append([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])      
+        if mood == 'melancholic' or mood == 'epic':
+            for _ in range(len(kick)):
+                chorus_guitar.append([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])  
+        else:
+            chorus_guitar = reduce_notes(fundamental['kick'])    
 
         kick_penta = fundamental['kick'].copy()
         hh_penta = fundamental['hhat'].copy()
@@ -1045,7 +1054,7 @@ with open("string.json", "w") as write_file:
 with open("percussion.json", "w") as write_file:
     json.dump(composed_rythm, write_file, indent=4)
 
-print("Seed was:", seed)
+#print("Seed was:", seed)
 
 '''s.fork(play_guitar, args=[composed_string['guitar_notes'][0], composed_string['g_rythm'][0]])
 #s.fork(play_bass, args=[composed_string['bass_notes'][0], composed_string['b_rythm'][0]])
