@@ -6,8 +6,10 @@ from presets import *
 import json
 import sys
 
-seed = random.randrange(sys.maxsize/2)
-rng = random.Random(4875434493137809954)
+seed = int(random.randrange(sys.maxsize/8000))
+random.seed(seed)
+
+
 
 
 scales = {'minor scales':{'aeolian': [2, 1, 2, 2, 1, 2, 2],      
@@ -34,7 +36,7 @@ f_pitch = 0
 
 
 
-mood = 'aggressive'
+mood = 'epic'
 
 d_file = open('Drum Map.txt', 'r')
 drum_kit = d_file.readlines()
@@ -202,7 +204,10 @@ def make_guitar(rythm, isLeads=False, isChorus=False):
             compas = []
             for i in range(len(r)):
                 if ((r[i] == 0.25 or r[i] == 0.125) and isLeads == False) or (allEqual(r) and r[i] == 0.5):
-                    compas.append([scale_chords[2][0][0], scale_chords[2][0][-1]])
+                    if mood == 'aggressive':
+                        compas.append([scale_chords[2][0][0], scale_chords[2][0][-1]])
+                    else:
+                        compas.append([scale_chords[2][progression[prog_count]][0], scale_chords[2][progression[prog_count]][-1]])
                 else:
                     if i == 0:
                         compas.append(scale_chords[2][progression[prog_count]][0])
@@ -251,7 +256,7 @@ def Fundamental(part=''):
 
     #Checking mood to discard 1/16 and 1/32 notes
     if mood == 'melancholic':
-        blacks = 1
+        blacks = 2
         figure = 4
     
     #Discarding 1/4 notes for aggressive
@@ -261,10 +266,8 @@ def Fundamental(part=''):
     
     #Chechinkg part of song to discard 1/32 notes
     if part == 'chorus':
-        blacks = 1
+        blacks = 2
         figure = 3
-        if mood != 'melancholic':
-            figure -= 1
 
     #Building fundamental rythm
     for _ in range(1):
@@ -678,18 +681,18 @@ def Verso(string, rythm):
             
         
 
-    #Checking verse length to be multiple of 8 between 32 and 48 bars
-    if len(kick) % 8 == 0 and len(kick) > 32 and len(kick) <= 48:
+    #Checking verse length to be multiple of 8 between 16 and 32 bars
+    if len(kick) % 8 == 0 and len(kick) > 16 and len(kick) <= 32:
         pass
-    elif len(kick) > 32:
+    elif len(kick) > 16:
         print(len(kick))
-        while len(kick) % 8 != 0 and len(kick) >= 48:
+        while len(kick) % 8 != 0 and len(kick) >= 32:
             del kick[-1]
             del guitar[-1]
             del snare[-1]
             del hhat[-1]
             del cimbal[-1]
-    elif len(kick) < 28:
+    elif len(kick) < 16:
         while len(kick) < 32:
             kick.append(kick[-1])
             guitar.append(guitar[-1])
@@ -698,7 +701,7 @@ def Verso(string, rythm):
             cimbal.append(cimbal[-1])
     
     #Checking for same bar lengths between guitar and the rest
-    while len(kick) > 48:
+    while len(kick) > 32:
         del kick[-1]
         del snare[-1]
         del hhat[-1]
@@ -750,11 +753,10 @@ def Coro(fundamental):
     print(chorus_choise, ' chorus')
 
     if mood == 'aggressive':
-        repetition = random.randint(3,5)
-    elif mood == 'epic':
         repetition = random.randint(2,3)
-    elif mood == 'melancholic':
-        repetition = random.randint(1,3)
+
+    elif mood == 'epic' or mood == 'melancholic':
+        repetition = random.randint(1,2)
     
     if chorus_choise == 'New':
         new_fundamental = Fundamental(part='chorus')
@@ -883,7 +885,7 @@ def Outro(verse, last_chord):
     
     outro['guitar'][0] = [4.0]
     outro['guitar_notes'][0] = [last_chord]
-    outro['guitar'][1] = [4.0]
+    outro['guitar'][1] = [-4.0]
     outro['guitar_notes'][1] = [last_chord]
 
     outro['bass_rythm'][0] = [-4.0]
@@ -948,7 +950,7 @@ def Composer():
     song_structure.append('Chorus')
 
     #Will it have outtro?
-    if have_outtro:
+    if have_outtro and mood == 'aggressive':
         #It has an outtro
         song_structure.append('Outro')
     
@@ -1055,25 +1057,8 @@ composed = Composer()
 
 #---------------------MUSIKONG-----------------------
 
-'''for i in composition['string']['guitar']:
-    print(i)
-print(len(composition['string']), ' len of fundamental')
-print('length of verse: ', (len(verso1['kick'])*4)/(s.tempo/60))
-print('length of chorus: ', (len(coro['kick'])*4)/(s.tempo/60))'''
-print('holi')
-
 
 with open("song.json", "w") as write_file:
     json.dump(composed, write_file, indent=4)
 
 print("Seed was:", seed)
-
-'''s.fork(play_guitar, args=[composed_string['guitar_notes'][0], composed_string['g_rythm'][0]])
-#s.fork(play_bass, args=[composed_string['bass_notes'][0], composed_string['b_rythm'][0]])
-s.fork(play_kick_drum, args=[composed_rythm['kick'][0]])
-s.fork(play_hhat, args=[composed_rythm['hhat'][0]]) 
-s.fork(play_snare, args=[composed_rythm['snare'][0]])
-s.fork(play_cimbal, args=[composed_rythm['cimbal'][0]])
-
-
-s.wait_for_children_to_finish()'''

@@ -5,7 +5,7 @@ import time
 from presets import *
 import json
 
-seed = 2971340075802586027
+#1917154672193248209
 
 jsong = open('song.json')
 
@@ -13,7 +13,7 @@ song= json.load(jsong)
 
 s = Session()
 
-s.tempo = 180
+s.tempo = 160
 
 try:
     drum = s.new_midi_part('drums', 1)
@@ -88,7 +88,7 @@ def play_song():
     initial_tempo = s.tempo
     
     for i in range(0, song_length - 1):
-        if 4.0 in string['g_rythm'][i] and s.tempo == initial_tempo:
+        if (4.0 in string['g_rythm'][i] or -4.0 in string['g_rythm'][i]) and s.tempo == initial_tempo:
             s.tempo = s.tempo/2
         
         s.fork(play_guitar, args=[string['guitar_notes'][i], string['g_rythm'][i]])
