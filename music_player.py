@@ -4,16 +4,22 @@ import random
 import time
 from presets import *
 import json
+import os, psutil
+
+process = psutil.Process(os.getpid())
+
+print('Initial CPU usage:, ', psutil.cpu_percent(), '%')
+print('Initial memory usage: ', round(process.memory_info().rss / 1024 ** 2, 2),'Mb')
 
 #1917154672193248209
 
-jsong = open('song.json')
+jsong = open('songs/song_aggressive_4875434493137809954.json')
 
 song= json.load(jsong)
 
 s = Session()
 
-s.tempo = 160
+s.tempo = 180
 
 try:
     drum = s.new_midi_part('drums', 1)
@@ -86,6 +92,7 @@ def play_song():
     song_length = len(string['g_rythm'])
 
     initial_tempo = s.tempo
+
     
     for i in range(0, song_length - 1):
         if (4.0 in string['g_rythm'][i] or -4.0 in string['g_rythm'][i]) and s.tempo == initial_tempo:
@@ -99,7 +106,10 @@ def play_song():
         s.fork(play_cimbal, args=[perc['cimbal'][i]])
 
         s.wait_for_children_to_finish()
-        
+            
         
 
 play_song()
+
+print('Final CPU usage: ', psutil.cpu_percent(), '%')
+print('Final memory usage: ', round(process.memory_info().rss / 1024 ** 2, 2), 'Mb')

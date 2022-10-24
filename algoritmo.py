@@ -5,8 +5,15 @@ import time
 from presets import *
 import json
 import sys
+import os, psutil
 
-seed = int(random.randrange(sys.maxsize/8000))
+process = psutil.Process(os.getpid())
+
+print('Initial CPU usage:, ', psutil.cpu_percent(), '%')
+print('Initial memory usage: ', round(process.memory_info().rss / 1024 ** 2, 2),'Mb')
+start = time.time()
+
+seed = random.randrange(int(sys.maxsize/8000))
 random.seed(seed)
 
 
@@ -36,7 +43,7 @@ f_pitch = 0
 
 
 
-mood = 'epic'
+mood = 'aggressive'
 
 d_file = open('Drum Map.txt', 'r')
 drum_kit = d_file.readlines()
@@ -98,15 +105,11 @@ def string_notes(pitch = 4, scale_name=''):
                 pila.append(note)
         notes.append(pila)
         pila = []
-    
-    for i in notes:
-        print(i)
+
     
     flat_str_notes = [item for sublist in notes for item in sublist]
     scale_chords = make_chords(scale=flat_str_notes, scale_form = len(notes[0]))
 
-    for i in scale_chords:
-        print(i)
 
     return [notes, scale_name, scale_chords]
 
@@ -121,8 +124,6 @@ def make_progression(scale_name):
     else:
         blues = random.choice(list(tonalities.keys()))
         tonality = random.choice(tonalities[blues])
-
-    print(tonality, len(tonality))
     
     for i in range(8):
         if len(tonality) == 1:
@@ -146,7 +147,6 @@ def make_progression(scale_name):
     if progresion[-1] != 0:
         progresion[-1] = 0
 
-    print(progresion)
     return progresion
 
 def make_bass(rythm):
@@ -207,7 +207,8 @@ def make_guitar(rythm, isLeads=False, isChorus=False):
                     if mood == 'aggressive':
                         compas.append([scale_chords[2][0][0], scale_chords[2][0][-1]])
                     else:
-                        compas.append([scale_chords[2][progression[prog_count]][0], scale_chords[2][progression[prog_count]][-1]])
+                        random_octave = random.randint(2, 4)
+                        compas.append([scale_chords[random_octave][progression[prog_count]][0], scale_chords[2][progression[prog_count]][-1]])
                 else:
                     if i == 0:
                         compas.append(scale_chords[2][progression[prog_count]][0])
@@ -607,15 +608,11 @@ def Verso(string, rythm):
             string[1] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
             string[2] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
             string[4] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
-            string[5] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
-            string[6] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
 
             rythm['kick'][0] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
             rythm['kick'][1] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
             rythm['kick'][2] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
             rythm['kick'][4] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
-            rythm['kick'][5] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
-            rythm['kick'][6] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
     
     #Checking for leads
     for d in range(len(desicions)):
@@ -636,7 +633,6 @@ def Verso(string, rythm):
         pass
     else: #Repeticion
         repetition = random.uniform(0, 1)
-        print('rep = ', repetition)
         #Repeticion sencilla
         if repetition <= 0.33:
             for i in desicions_copy:
@@ -685,7 +681,6 @@ def Verso(string, rythm):
     if len(kick) % 8 == 0 and len(kick) > 16 and len(kick) <= 32:
         pass
     elif len(kick) > 16:
-        print(len(kick))
         while len(kick) % 8 != 0 and len(kick) >= 32:
             del kick[-1]
             del guitar[-1]
@@ -736,8 +731,6 @@ def Verso(string, rythm):
     verso['guitar_notes'] = guitar_notes
     verso['bass_rythm'] = guitar.copy()
 
-    print(desicions)
-
     return verso
 
 
@@ -750,7 +743,6 @@ def Coro(fundamental):
     cimbal_penta = []
 
     chorus_choise = random.choice(['New', 'Fundamental', 'Melodic'])
-    print(chorus_choise, ' chorus')
 
     if mood == 'aggressive':
         repetition = random.randint(2,3)
@@ -895,11 +887,11 @@ def Outro(verse, last_chord):
 
     outro['kick'][0] = [-1.0, -1.0, -1.0, -1.0]
     outro['snare'][0] = [-1.0, -1.0, -1.0, -1.0]
-    outro['hhat'][0] = [-1.0, -1.0, -1.0, -1.0]
+    outro['hhat'][0] = [1.0, 1.0, 1.0, 1.0]
     outro['cimbal'][0] = [-1.0, -1.0, -1.0, -1.0]
     outro['kick'][1] = [-1.0, -1.0, -1.0, -1.0]
     outro['snare'][1] = [-1.0, -1.0, -1.0, -1.0]
-    outro['hhat'][1] = [-1.0, -1.0, -1.0, -1.0]
+    outro['hhat'][1] = [1.0, 1.0, 1.0, 1.0]
     outro['cimbal'][1] = [-1.0, -1.0, -1.0, -1.0]
     
     try:
@@ -966,7 +958,6 @@ def Composer():
     outro = {}
 
     for i in range(len(song_structure)):
-        print(song_structure[i])
         if song_structure[i] == 'Intro':
             intro = Intro(composition['string']['guitar'], composition['perc'])
 
@@ -1024,7 +1015,6 @@ def Composer():
                 song_rythm_composed['cimbal'].append(coro['cimbal'][c])
 
         if song_structure[i] == 'Outro':
-            print(song_string_composed['guitar_notes'][-1][-1])
             outro = Outro(verso1, song_string_composed['guitar_notes'][-1][-1])
 
             for c in range(len(outro['kick']) - 1):
@@ -1057,8 +1047,16 @@ composed = Composer()
 
 #---------------------MUSIKONG-----------------------
 
+#"+str(mood)+"_"+str(seed)+"
 
-with open("song.json", "w") as write_file:
+with open("songs/song.json", "w") as write_file:
     json.dump(composed, write_file, indent=4)
 
+
+stop = time.time()
 print("Seed was:", seed)
+print('Final CPU usage:, ', psutil.cpu_percent(), '%')
+print('Final memory usage: ', round(process.memory_info().rss / 1024 ** 2, 2), 'Mb')
+print('Generation time: ', round(stop-start, 5), 's')
+
+
