@@ -4,22 +4,15 @@ import random
 import time
 from presets import *
 import json
-import os, psutil
 
-process = psutil.Process(os.getpid())
 
-print('Initial CPU usage:, ', psutil.cpu_percent(), '%')
-print('Initial memory usage: ', round(process.memory_info().rss / 1024 ** 2, 2),'Mb')
 
-#1917154672193248209
 
-jsong = open('songs/song_aggressive_4875434493137809954.json')
-
-song= json.load(jsong)
-
+seed = 0
+mood = ''
 s = Session()
 
-s.tempo = 180
+s.fast_forward_in_time(500)
 
 try:
     drum = s.new_midi_part('drums', 1)
@@ -31,17 +24,11 @@ except:
     d_guitar = s.new_part('Distortion Guitar')
     
 
-
-
 #Negative note means: a silence with the duration of said note
-
 def play_guitar(notas, rythm):
     for d in range(len(rythm)):
         if rythm[d] < 0.0:
-            if type(notas[d]) == int:
-                d_guitar.play_note(notas[d], 0.0, (rythm[d]* -1))
-            else:
-                d_guitar.play_chord(notas[d], 0.0, (rythm[d]* -1))
+            wait((rythm[d]* -1))
         else:
             if type(notas[d]) == int:
                 d_guitar.play_note(notas[d], 1.0, rythm[d])
@@ -51,14 +38,14 @@ def play_guitar(notas, rythm):
 def play_bass(notas, rythm):
     for d in range(len(rythm)):
         if rythm[d] < 0.0:
-            p_bass.play_note(notas[d], 0.0, (rythm[d]* -1))
+            wait((rythm[d]* -1))
         else:
             p_bass.play_note(notas[d], 1.0, rythm[d])
 
 def play_snare(notas):
     for d in range(len(notas)):
         if notas[d] < 0.0:
-            drum.play_note(38, 0.0, (notas[d]* -1))
+            wait((notas[d]* -1))
         else:
             drum.play_note(38, 1.0, notas[d])
         
@@ -66,26 +53,42 @@ def play_snare(notas):
 def play_kick_drum(notas):
     for d in range(len(notas)):
         if notas[d] < 0.0:
-            drum.play_note(36, 0.0, (notas[d] * -1))
+            wait((notas[d] * -1))
         else:
             drum.play_note(36, 1.0, notas[d])
 
 def play_cimbal(notas):
     for d in range(len(notas)):
         if notas[d] < 0.0:
-            drum.play_note(58, 0.0, (notas[d] * -1))
+            wait((notas[d] * -1))
         else:
             drum.play_note(58, 1.0, notas[d])
 
 def play_hhat(notas):
     for d in range(len(notas)):
         if notas[d] < 0.0:
-            drum.play_note(42, 0.0, (notas[d] * -1))
+            wait((notas[d] * -1))
         else:
             drum.play_note(42, 1.0, notas[d])
 
 
-def play_song():
+def play_song(tempo, mood, seed, partitura):
+    mood = mood
+    seed = seed
+
+    jsong = open('songs/song_'+mood+'_'+str(seed)+'.json')
+    song= json.load(jsong)
+
+    if tempo == 0:
+        if mood == 'aggressive':
+            s.tempo = 180
+        elif mood == 'epic':
+            s.tempo = 150
+        elif mood == 'melancholic':
+            s.tempo = 120
+    else:
+        s.tempo = tempo
+
     string = song['string']
     perc = song['percussion']
 
@@ -93,6 +96,8 @@ def play_song():
 
     initial_tempo = s.tempo
 
+    if partitura: 
+        s.start_transcribing(instrument_or_instruments=[d_guitar, p_bass])
     
     for i in range(0, song_length - 1):
         if (4.0 in string['g_rythm'][i] or -4.0 in string['g_rythm'][i]) and s.tempo == initial_tempo:
@@ -106,10 +111,8 @@ def play_song():
         s.fork(play_cimbal, args=[perc['cimbal'][i]])
 
         s.wait_for_children_to_finish()
-            
-        
-
-play_song()
-
-print('Final CPU usage: ', psutil.cpu_percent(), '%')
-print('Final memory usage: ', round(process.memory_info().rss / 1024 ** 2, 2), 'Mb')
+    
+    if partitura:
+        s.stop_transcribing().to_score(time_signature="4/4").show()
+                
+play_song(tempo=0, mood='aggressive', seed=1999, partitura=True)
