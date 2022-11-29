@@ -12,8 +12,6 @@ seed = 0
 mood = ''
 s = Session()
 
-s.fast_forward_in_time(500)
-
 try:
     drum = s.new_midi_part('drums', 1)
     p_bass = s.new_midi_part('Electric Bass (pick)', 2)
@@ -95,6 +93,7 @@ def play_song(tempo, mood, seed, partitura):
     song_length = len(string['g_rythm'])
 
     initial_tempo = s.tempo
+    
 
     if partitura: 
         s.start_transcribing(instrument_or_instruments=[d_guitar, p_bass])
@@ -115,4 +114,3 @@ def play_song(tempo, mood, seed, partitura):
     if partitura:
         s.stop_transcribing().to_score(time_signature="4/4").show()
                 
-play_song(tempo=0, mood='aggressive', seed=1999, partitura=True)
